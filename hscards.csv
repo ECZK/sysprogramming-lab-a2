@@ -1,10 +1,9 @@
 id,name,cost,text,attack,health,type,class,rarity
-68377,"Arcanite Reaper",5,,5,,"WEAPON","WARRIOR","FREE"
-56899,"Metamorphosis",5,"Swap your Hero Power to Deal 4 damage. After 2 uses swap it back.",,,"SPELL","DEMONHUNTER","LEGENDARY"
-56899,"Metamorphosis",5,"Swap your Hero Power to ""Deal 4 damage."" After 2 uses, swap it back.",,,"SPELL","DEMONHUNTER","LEGENDARY"
-62889,"Silverleaf Poison",2,"Give your weapon\n""After your hero attacks,\ndraw a card.""",,,"SPELL","ROGUE","COMMON"
 70005,"Build a Snowman",3,"Summon a 3/3\nSnowman that <b>Freezes</b>.\nAdd ""Build a Snowbrute""\nto your hand. ",,,"SPELL","MAGE","RARE"
+62889,"Silverleaf Poison",2,"Give your weapon\n""After your hero attacks,\ndraw a card.""",,,"SPELL","ROGUE","COMMON"
 47053,"Darius Crowley",5,"<b>Rush</b>\nAfter this attacks and kills\na minion, gain +2/+2.",4,4,"MINION","WARRIOR","LEGENDARY"
+68377,"Arcanite Reaper",5,,5,,"WEAPON","WARRIOR","FREE"
+56899,"Metamorphosis",5,,,,"SPELL","DEMONHUNTER","LEGENDARY"
 64900,"The Demon Seed",1,"<b>Questline:</b> Take 8\ndamage on your turns.\n<b>Reward:</b> <b>Lifesteal</b>. Deal $3\ndamage to the enemy hero.",,,"SPELL","WARLOCK","LEGENDARY"
 2874,"Forgotten Torch",3,"Deal $3 damage. Shuffle a 'Roaring Torch' into your deck that deals 6 damage.",,,"SPELL","MAGE","COMMON"
 59539,"Guardian Animals",8,"Summon two Beasts that cost (5) or less from your deck. Give them <b>Rush</b>.",,,"SPELL","HUNTER","EPIC"

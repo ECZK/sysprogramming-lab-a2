@@ -62,7 +62,6 @@ int main(int argc, char **argv) {
 	printf("%s", lineptr);
 
 	while ((getline(&lineptr, &n, fd)) != -1) {
-	// getline(&lineptr, &n, fd);
 	CARD_T *card = parse_card(lineptr);
 	print_card(card);
 	}
@@ -171,117 +170,49 @@ CARD_T *parse_card(char *line) {
 	printf("after cost:%s\n", stringp);
 
 	// parsing text
-	// checking if text is empty by checking length
-	// copying stringp to peek to not destroy string
-	stringp++;
-	char *peek = strdup(stringp);
-	char *stringpeek = peek;
-	char *stringtoken = strsep(&stringpeek, ",");
-	int length = strlen(stringtoken);
-	printf("peek:%s\n", stringtoken);
-	printf("length:%d\n", length);
-	free(peek);
 
-	// to keep track of the strings
-	int offset = 0;
+	// text needs to have memory allocated so it will
+	// not break the free_memory function
+
 	char buffer[1024];
+	int offset = 0; 
 
-	// in all circumstance, it should move on to the next comma sep
-	if (length > 0) {
-		
-		// check if there are double quotes 
-		char *doubleq = strstr(stringp, "\"\"");
-		if (doubleq != NULL){
-			// copying the content before the quotes
-			token = strsep(&stringp, "\"");
-			strcpy(buffer, token);			// copy token to buffer
-			stringp++; 						// move over the remaining "
-			offset = strlen(token);			// set offset for buffer
-
-			// check if there are triple quotes
-			// if it ends in triple quote, take the whole string 
-			char *tripleq = strstr(stringp, "\"\"\"");
-			if (tripleq != NULL){
-				token = strsep(&stringp, "\"");
-
-				// opening double quotes
-				strcpy(buffer+offset, "\"\"");
-				offset += strlen("\"\"");
-
-				strcpy(buffer+offset, token);
-				offset += strlen(token);
-
-				// closing double quotes
-				strcpy(buffer+offset, "\"\"");
-				offset += strlen("\"\"");
-
-				card->text = strdup(buffer);
-			} 
-			// compare if the next comma will appear before or 
-			// after the closing single quote 
-			else {
-				// find & add opening quote
-				token = strsep(&stringp, "\"");
-
-				// opening double quotes
-				strcpy(buffer+offset, "\"\"");
-				offset += strlen("\"\"");
-				// quote content
-				strcpy(buffer+offset, token);
-				offset += strlen(token);
-				// closing quotes
-				strcpy(buffer+offset, "\"\"");
-				offset += strlen("\"\"");
-				stringp++;
-
-				char *singleq = strstr(stringp, "\"");
-				char *comma = strstr(stringp, ",");
-
-				// check if comma is before end of str
-				if (strlen(comma) > strlen(singleq)) {
-					token = strsep(&stringp, ",");
-
-					strcpy(buffer+offset, token);
-					offset += strlen(token);
-
-					strcpy(buffer+offset, ",");
-					offset += strlen(",");
-
-					token = strsep(&stringp, "\"");
-					strcpy(buffer+offset, token);
-					stringp++;		// remove remaining ,
-
-					char *sanitized = fix_text(buffer);
-					// printf("sanitized:%s", sanitized);
-					card->text = strdup(sanitized);
-					// printf("\nstringp:%s", stringp);
-					
-				}
-				// no comma before end of str
-				else {
-					token = strsep(&stringp, ",");
-					strcpy(buffer+offset, token);
-					card->text = strdup(buffer);
-				}
-			};
-		} 
-		else {
-			token = strsep(&stringp, "\"");
-			strcpy(buffer, token);	
-			card->text = strdup(buffer);
-		}
-
-	} 
-	else {
-		printf("notext");
-		stringp++;
+	// text is null
+	if (strncmp(stringp, ",", strlen(",")) == 0) {
 		card->text = strdup("");
+		printf("\ntext is null\n\n");
+	}
+	else { // text is not null
+		stringp++;
+		// while loop through the text and find the next "
+		// char *dbquote;
+		char *dbquote = strstr(stringp, "\"");
+		// printf("dbquote:%s", dbquote);
+		// printf("dbquote:%s", dbquote+1);
+		while((dbquote = strstr(stringp, "\""))) {
+			// check if it's a terminating quote
+			if (strncmp(dbquote+1, ",", strlen(",")) == 0) {
+				token = strsep(&stringp, "\"");
+				strcpy(buffer+offset, token);
+				break;
+			}
+			// not a terminating quote
+			else {
+				token = strsep(&stringp, "\"");
+				strcpy(buffer+offset, token);
+				offset += strlen(token);
+				stringp++;
+				strcpy(buffer+offset, "\"\"");
+				offset += strlen("\"\"");
+			}
+		}
+		printf("buffer:%s\n", buffer);
+		// char *fixed_text = fix_text(buffer);
+		card->text = strdup(buffer);
 	}
 
-	printf("stringp:%s\n", stringp);
-
 	// parsing attack
-	// stringp++;
+	stringp++;
 	token = strsep(&stringp, ",");
 	card->attack = atoi(token);
 	printf("attack:%s\n", token);
@@ -307,10 +238,8 @@ CARD_T *parse_card(char *line) {
 	}
 
 	// parsing class
-	// stringp++;	// get rid of remaining "
-	// stringp++;	// get rid of ,,
-	stringp++;
-	stringp++;
+	stringp++;	// get rid of remaining "
+	stringp++;	// get rid of ,,
 	token = strsep(&stringp, "\"");
 	printf("class:%s\n", token);
 	printf("stringp:%s\n", stringp);
@@ -327,7 +256,7 @@ CARD_T *parse_card(char *line) {
 	if (strcmp(token, "WARLOCK") == 0) card->class = WARLOCK;
 	if (strcmp(token, "WARRIOR") == 0) card->class = WARRIOR;
 
-	// parsing rarity
+	// // parsing rarity
 	stringp++;	// get rid of remaining "
 	stringp++;	// get rid of ,,
 	token = strsep(&stringp, "\"");
