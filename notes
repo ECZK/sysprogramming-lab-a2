@@ -1,0 +1,43 @@
+id,
+str name,
+int cost,
+str text,
+int attack,
+int health,
+type,
+class,
+rarity
+
+62889,"Silverleaf Poison",2,"Give your weapon\n""After your hero attacks,\ndraw a card.""",,,"SPELL","ROGUE","COMMON"
+
+"Give your weapon\n""After your hero attacks,\ndraw a card.""",
+
+56899,"Metamorphosis",5,"Swap your Hero Power to ""Deal 4 damage."" After 2 uses, swap it back.",,,"SPELL","DEMONHUNTER","LEGENDARY"
+
+"Swap your Hero Power to ""Deal 4 damage."" After 2 uses, swap it back.",
+
+<b>Questline:</b> Take 8\ndamage on your turns.\n<b>Reward:</b> <b>Lifesteal</b>. Deal $3\ndamage to the enemy hero.
+
+
+after cost:
+are there any commas in between? 
+    commas appear when there are no double quotes
+    commas don't appear before double quotes
+    commas appear in the double quotes 
+    commas appear after double quotes 
+
+are there double quotes // to check for its existence
+    are there triple quotes // it only ends in either single or triple quotes
+    are there single quotes // 
+        find the next comma
+        find the next quote
+
+i want to use a regular buffer for the strings, then after sanitizing the string i will then copy it to
+the card's text using stringdup 
+
+there are multiple b
+nested b
+
+b >> i 
+
+68377,"Arcanite Reaper",5,text,attack 5,health ,"WEAPON","WARRIOR","FREE"
