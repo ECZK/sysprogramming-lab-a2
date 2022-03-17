@@ -56,15 +56,39 @@ int main(int argc, char **argv) {
 
 	char *lineptr = NULL;	// retrieved line
 	size_t n = 0;			// 
+
+	cards = realloc(NULL, sizeof(CARD_T)*(total_cards+1));
 	
 	// first read to get rid of the header
 	getline(&lineptr, &n, fd);
-	printf("%s", lineptr);
 
 	while ((getline(&lineptr, &n, fd)) != -1) {
-	CARD_T *card = parse_card(lineptr);
-	print_card(card);
+		CARD_T *card = parse_card(lineptr);
+		int is_dupe = dupe_check(card->id, card->name);
+		// when there are no duplicates
+		if (is_dupe == NO_DUPE) {
+			cards[total_cards] = card;
+			cards = realloc(cards, sizeof(CARD_T)*(total_cards+1));
+			total_cards++;
+		} 
+		// when the dupe is much higher than the current card
+		else if (is_dupe == DUPE) {}
+
+		// when the dupe is actually lower than the current card 
+		// index of current card is returned
+		// free memory of this card 
+		// and then store the new card into the array 
+		else {
+			// printf("NEED TO REPLACE AT POSITION %d\n\n", is_dupe);
+		}
+
+		// print_card(card);
 	}
+
+	// for (int i=0; i<total_cards; i++) {
+	// 	print_card(cards[i]);
+	// 	free_card(cards[i]);
+	// }
 
 
 	if (fd == NULL) return -2;
@@ -85,8 +109,16 @@ int main(int argc, char **argv) {
  *        the array. When that happens, return the
  *        index of the card so it may be removed...
  */
+
 int dupe_check(unsigned id, char *name) {
-	return 0;
+	for (int i=0; i<total_cards; i++){
+		CARD_T *card = cards[i];
+		if (strcmp(name, card->name) == 0) {
+			if (id > card->id) return DUPE; // dupe is higher
+			else return i;					// dupe is lower
+		}
+	}
+	return NO_DUPE;
 }
 
 /*
@@ -104,7 +136,7 @@ int dupe_check(unsigned id, char *name) {
  * there is the potential for a memory error!
  */
 char *fix_text(char *text) {
-
+	printf("%s\n", text);
 	// char *quotes = strstr(text, "</b>");
 
 	// while(quotes != NULL) {
@@ -145,7 +177,6 @@ void free_card(CARD_T *card) {
  */
 CARD_T *parse_card(char *line) {
 	// fields with blanks: cost[2], text[3], attack[4], health[5] 
-	printf("%s\n", line);
 
 	CARD_T *card = malloc(sizeof(CARD_T));
 	char *stringp = line;
@@ -161,13 +192,11 @@ CARD_T *parse_card(char *line) {
 	stringp++; 
 	token = strsep(&stringp, "\"");
 	card->name = strdup(token);
-	printf("after name:%s\n", stringp);
 
 	// parsing cost
 	stringp++;
 	token = strsep(&stringp, ",");
 	card->cost = atoi(token);
-	printf("after cost:%s\n", stringp);
 
 	// parsing text
 
@@ -180,15 +209,11 @@ CARD_T *parse_card(char *line) {
 	// text is null
 	if (strncmp(stringp, ",", strlen(",")) == 0) {
 		card->text = strdup("");
-		printf("\ntext is null\n\n");
 	}
 	else { // text is not null
 		stringp++;
 		// while loop through the text and find the next "
-		// char *dbquote;
 		char *dbquote = strstr(stringp, "\"");
-		// printf("dbquote:%s", dbquote);
-		// printf("dbquote:%s", dbquote+1);
 		while((dbquote = strstr(stringp, "\""))) {
 			// check if it's a terminating quote
 			if (strncmp(dbquote+1, ",", strlen(",")) == 0) {
@@ -206,29 +231,22 @@ CARD_T *parse_card(char *line) {
 				offset += strlen("\"\"");
 			}
 		}
-		printf("buffer:%s\n", buffer);
-		// char *fixed_text = fix_text(buffer);
-		card->text = strdup(buffer);
+		char *fixed_text = fix_text(buffer);
+		card->text = strdup(fixed_text);
 	}
 
 	// parsing attack
 	stringp++;
 	token = strsep(&stringp, ",");
 	card->attack = atoi(token);
-	printf("attack:%s\n", token);
-	printf("stringp:%s\n", stringp);
 	
 	// parsing health
 	token = strsep(&stringp, ",");
 	card->health = atoi(token);
-	printf("health:%s\n", token);
-	printf("stringp:%s\n", stringp);
 	
 	// parsing type
 	stringp++;
 	token = strsep(&stringp, "\"");
-	printf("type:%s\n", token);
-	printf("stringp:%s\n", stringp);
 
 	switch(token[0]) {
 		case 'H' : card->type = HERO; break;
@@ -241,8 +259,6 @@ CARD_T *parse_card(char *line) {
 	stringp++;	// get rid of remaining "
 	stringp++;	// get rid of ,,
 	token = strsep(&stringp, "\"");
-	printf("class:%s\n", token);
-	printf("stringp:%s\n", stringp);
 
 	if (strcmp(token, "DEMONHUNTER") == 0) card->class = DEMONHUNTER;
 	if (strcmp(token, "DRUID") == 0) card->class = DRUID;
@@ -260,8 +276,6 @@ CARD_T *parse_card(char *line) {
 	stringp++;	// get rid of remaining "
 	stringp++;	// get rid of ,,
 	token = strsep(&stringp, "\"");
-	printf("rarity:%s\n", token);
-	printf("stringp:%s\n", stringp);
 
 	switch(token[0]) {
 		case 'F' : card->rarity = FREE; break;
