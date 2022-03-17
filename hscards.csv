@@ -1,8 +1,8 @@
 id,name,cost,text,attack,health,type,class,rarity
+70005,"Build a Snowman",3,"Summon a 3/3\nSnowman that <b>Freezes</b>.\nAdd ""Build a Snowbrute""\nto your hand. ",,,"SPELL","MAGE","RARE"
 69649,"Abusive Sergeant",1,"<b>Battlecry:</b> Give a minion +2 Attack this turn.",1,1,"MINION","NEUTRAL","COMMON"
 69761,"Abusive Sergeant",1,"<b>Battlecry:</b> Give a minion +2 Attack this turn.",2,1,"MINION","NEUTRAL","COMMON"
 242,"Abusive Sergeant",1,"<b>Battlecry:</b> Give a minion +2 Attack this turn.",1,1,"MINION","NEUTRAL","COMMON"
-70005,"Build a Snowman",3,"Summon a 3/3\nSnowman that <b>Freezes</b>.\nAdd ""Build a Snowbrute""\nto your hand. ",,,"SPELL","MAGE","RARE"
 62889,"Silverleaf Poison",2,"Give your weapon\n""After your hero attacks,\ndraw a card.""",,,"SPELL","ROGUE","COMMON"
 47053,"Darius Crowley",5,"<b>Rush</b>\nAfter this attacks and kills\na minion, gain +2/+2.",4,4,"MINION","WARRIOR","LEGENDARY"
 68377,"Arcanite Reaper",5,,5,,"WEAPON","WARRIOR","FREE"

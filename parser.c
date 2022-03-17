@@ -70,6 +70,7 @@ int main(int argc, char **argv) {
 			cards[total_cards] = card;
 			cards = realloc(cards, sizeof(CARD_T)*(total_cards+1));
 			total_cards++;
+			break;
 		} 
 		// when the dupe is much higher than the current card
 		else if (is_dupe == DUPE) {}
@@ -135,16 +136,40 @@ int dupe_check(unsigned id, char *name) {
  * be able to insert an additional character else
  * there is the potential for a memory error!
  */
+
+// i have to use memory so I can actually return the 
 char *fix_text(char *text) {
+	char buffer[1024];
+	char *stringp = text;
+	int offset = 0;
 	printf("%s\n", text);
-	// char *quotes = strstr(text, "</b>");
+	char *token = strsep(&stringp, "\"\"");
+	
+	strcpy(buffer, token); 
+	offset += strlen(token);
 
-	// while(quotes != NULL) {
-	// 	memmove(quotes, END, strlen(END));
-	// 	printf("%s\n", quotes);
-	// 	quotes = strstr(quotes+strlen("</b>"), "</b>");
-	// }
+	strcpy(buffer+offset, "\""); 
+	offset += strlen("\"");
 
+	stringp++;
+	token = strsep(&stringp, "\"\"");
+
+	strcpy(buffer+offset, token); 
+	offset += strlen(token);
+
+	strcpy(buffer+offset, "\""); 
+	offset += strlen("\"");
+
+	strcpy(buffer+offset, stringp); 
+
+	// then you kind of continue on with the buffered string because it's already updated 
+	printf("buffer:%s\n", buffer);
+	printf("text:%s\n", text);
+	printf("stringp:%s\n", stringp);
+
+	// instead of char array and strcpy, switch all of these into 
+	// memory allocated string and using memmove 
+	// use realloc when you have to 
 	
 	return text;
 }
