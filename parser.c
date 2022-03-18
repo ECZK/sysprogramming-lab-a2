@@ -139,31 +139,36 @@ int dupe_check(unsigned id, char *name) {
 
 // i have to use memory so I can actually return the 
 char *fix_text(char *text) {
-	char buffer[1024];
+	char *buffer = strdup(text);
 	char *stringp = text;
 	int offset = 0;
-	printf("%s\n", text);
+
+	// replacing "" to "
 	char *token = strsep(&stringp, "\"\"");
 	
-	strcpy(buffer, token); 
+	memmove(buffer, token, strlen(token)); 
 	offset += strlen(token);
 
-	strcpy(buffer+offset, "\""); 
+	memmove(buffer+offset, "\"", strlen("\"")); 
 	offset += strlen("\"");
 
 	stringp++;
 	token = strsep(&stringp, "\"\"");
 
-	strcpy(buffer+offset, token); 
+	memmove(buffer+offset, token, strlen(token)); 
 	offset += strlen(token);
 
-	strcpy(buffer+offset, "\""); 
+	memmove(buffer+offset, "\"", strlen("\"")); 
 	offset += strlen("\"");
+	
+	stringp++;
+	memmove(buffer+offset, stringp, strlen(stringp)); 
+	offset += strlen(stringp);
 
-	strcpy(buffer+offset, stringp); 
+	memmove(buffer+offset, "\0", 1); 
 
 	// then you kind of continue on with the buffered string because it's already updated 
-	printf("buffer:%s\n", buffer);
+	printf("\"%s\"\n", buffer);
 	printf("text:%s\n", text);
 	printf("stringp:%s\n", stringp);
 
