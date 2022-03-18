@@ -146,35 +146,37 @@ char *fix_text(char *text) {
 	// replacing "" to "
 	char *token = strsep(&stringp, "\"\"");
 	
-	memmove(buffer, token, strlen(token)); 
-	offset += strlen(token);
+	while (stringp != NULL) {
+		// passing text before " into the buffer
+		memmove(buffer+offset, token, strlen(token)); 
+		offset += strlen(token);
 
-	memmove(buffer+offset, "\"", strlen("\"")); 
-	offset += strlen("\"");
+		// passing " into the buffer
+		memmove(buffer+offset, "\"", strlen("\"")); 
+		offset += strlen("\"");
 
-	stringp++;
-	token = strsep(&stringp, "\"\"");
+		// skip over the remaining "
+		stringp++;
 
-	memmove(buffer+offset, token, strlen(token)); 
-	offset += strlen(token);
+		// check if there are any remaining "" in stringp,
+		// if not, then transfer the rest of stringp into the buffer 
+		if ((strstr(stringp, "\"\"")) == NULL) {
+			memmove(buffer+offset, stringp, strlen(stringp)); 
+			offset += strlen(stringp);
+			break;
+		}
 
-	memmove(buffer+offset, "\"", strlen("\"")); 
-	offset += strlen("\"");
+		token = strsep(&stringp, "\"\"");
+	}
 	
-	stringp++;
-	memmove(buffer+offset, stringp, strlen(stringp)); 
-	offset += strlen(stringp);
-
 	memmove(buffer+offset, "\0", 1); 
 
 	// then you kind of continue on with the buffered string because it's already updated 
-	printf("\"%s\"\n", buffer);
+	printf("buffer:%s\n", buffer);
 	printf("text:%s\n", text);
 	printf("stringp:%s\n", stringp);
 
-	// instead of char array and strcpy, switch all of these into 
-	// memory allocated string and using memmove 
-	// use realloc when you have to 
+	
 	
 	return text;
 }
