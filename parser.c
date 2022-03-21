@@ -70,26 +70,22 @@ int main(int argc, char **argv) {
 			cards[total_cards] = card;
 			cards = realloc(cards, sizeof(CARD_T)*(total_cards+1));
 			total_cards++;
-			break;
+			// break;
 		} 
 		// when the dupe is much higher than the current card
 		else if (is_dupe == DUPE) {}
 
-		// when the dupe is actually lower than the current card 
-		// index of current card is returned
-		// free memory of this card 
-		// and then store the new card into the array 
+		// index of card that needs to be replaced
 		else {
 			// printf("NEED TO REPLACE AT POSITION %d\n\n", is_dupe);
 		}
 
-		// print_card(card);
 	}
 
-	// for (int i=0; i<total_cards; i++) {
-	// 	print_card(cards[i]);
-	// 	free_card(cards[i]);
-	// }
+	for (int i=0; i<total_cards; i++) {
+		print_card(cards[i]);
+		free_card(cards[i]);
+	}
 
 
 	if (fd == NULL) return -2;
@@ -97,19 +93,6 @@ int main(int argc, char **argv) {
 	fclose(fd);
 	return 0;
 }
-
-/*
- * This function has to return 1 of 3 possible values:
- *     1. NO_DUPE (-2) if the `name` is not found
- *        in the `cards` array
- *     2. DUPE (-1) if the `name` _is_ found in
- *        the `cards` array and the `id` is greater
- *        than the found card's id (keep the lowest one)
- *     3. The last case is when the incoming card has
- *        a lower id than the one that's already in
- *        the array. When that happens, return the
- *        index of the card so it may be removed...
- */
 
 int dupe_check(unsigned id, char *name) {
 	for (int i=0; i<total_cards; i++){
@@ -122,63 +105,128 @@ int dupe_check(unsigned id, char *name) {
 	return NO_DUPE;
 }
 
-/*
- * This function has to do _five_ things:
- *     1. replace every "" with "
- *     2. replace every \n with `\n`
- *     3. replace every </b> and </i> with END
- *     4. replace every <b> with BOLD
- *     5. replace every <i> with ITALIC
- *
- * The first three are not too bad, but 4 and 5
- * are difficult because you are replacing 3 chars
- * with 4! You _must_ `realloc()` the field to
- * be able to insert an additional character else
- * there is the potential for a memory error!
- */
-
-// i have to use memory so I can actually return the 
+// i have to use memory so I can actually return 
+// fixed text instead
 char *fix_text(char *text) {
 	char *buffer = strdup(text);
 	char *stringp = text;
 	int offset = 0;
 
 	// replacing "" to "
-	char *token = strsep(&stringp, "\"\"");
+	char *token;
 	
-	while (stringp != NULL) {
-		// passing text before " into the buffer
-		memmove(buffer+offset, token, strlen(token)); 
-		offset += strlen(token);
-
-		// passing " into the buffer
-		memmove(buffer+offset, "\"", strlen("\"")); 
-		offset += strlen("\"");
-
-		// skip over the remaining "
-		stringp++;
-
-		// check if there are any remaining "" in stringp,
-		// if not, then transfer the rest of stringp into the buffer 
-		if ((strstr(stringp, "\"\"")) == NULL) {
-			memmove(buffer+offset, stringp, strlen(stringp)); 
-			offset += strlen(stringp);
-			break;
-		}
-
+	if ((strstr(stringp, "\"\"")) != NULL) { 
 		token = strsep(&stringp, "\"\"");
+		while (stringp != NULL) {
+			// passing text before " into the buffer
+			memmove(buffer+offset, token, strlen(token)); 
+			offset += strlen(token);
+
+			// passing " into the buffer
+			memmove(buffer+offset, "\"", strlen("\"")); 
+			offset += strlen("\"");
+
+			// skip over the remaining "
+			stringp++;
+
+			// check if there are any remaining "" in stringp,
+			// if not, then transfer the rest of stringp into the buffer 
+			if ((strstr(stringp, "\"\"")) == NULL) {
+				memmove(buffer+offset, stringp, strlen(stringp)); 
+				offset += strlen(stringp);
+				break;
+			}
+
+			token = strsep(&stringp, "\"\"");
+		}
 	}
-	
-	memmove(buffer+offset, "\0", 1); 
 
-	// then you kind of continue on with the buffered string because it's already updated 
-	printf("buffer:%s\n", buffer);
-	printf("text:%s\n", text);
-	printf("stringp:%s\n", stringp);
+	// to make sure you end the string	
+	if (offset > 0) memmove(buffer+offset, "\0", 1); 
 
-	
-	
-	return text;
+	// copy updated contents from buffer into stringp again
+	// set offset back to prevent overflow
+	strcpy(stringp, buffer); 
+	offset = 0;
+
+	char *location = strstr(stringp, "</b>");
+	while (location != NULL) { 
+		memmove(location, END, strlen(END));
+		location = strstr(stringp, "</b>");
+	}
+
+	location = strstr(stringp, "</i>");
+	while (location != NULL) { 
+		memmove(location, END, strlen(END));
+		location = strstr(stringp, "</i>");
+	}
+
+	memmove(buffer, stringp, strlen(stringp));
+	// printf("%s\n", buffer);
+
+
+	location = strstr(stringp, "\\n");
+	while (location != NULL) { 
+		// to know where to overwrite
+		int position = location - stringp; 
+		strcpy(location, "\n");
+
+		// strcpy modifies where location would be pointing
+		// therefore we need to retrieve the same location from buffer
+		// since stringp is essentially a copy of buffer before this
+		location = strstr(buffer, "\\n");
+		// copying into where the position + bold to prevent overwriting
+		// the copied BOLD and skipping location by 3 to go over <b>
+		strcpy(stringp+position+strlen("\n"), location+2);
+		memmove(buffer, stringp, strlen(stringp));
+		memmove(buffer+strlen(stringp), "\0", 1);
+		// find the next <b>
+		location = strstr(stringp, "\\n");
+	}
+
+	location = strstr(stringp, "<b>");
+	while (location != NULL) { 
+		// to know where to overwrite
+		int position = location - stringp; 
+		strcpy(location, BOLD);
+		// strcpy modifies where location would be pointing
+		// therefore we need to retrieve the same location from buffer
+		// since stringp is essentially a copy of buffer before this
+		location = strstr(buffer, "<b>");
+		// copying into where the position + bold to prevent overwriting
+		// the copied BOLD and skipping location by 3 to go over <b>
+		strcpy(stringp+position+strlen(BOLD), location+3);
+		// reallocating memory to make sure that the fixed string can
+		// be moved back into the buffer
+		buffer = realloc(buffer, sizeof(char *)*(strlen(buffer)+1));
+		memmove(buffer, stringp, strlen(stringp));
+		memmove(buffer+strlen(stringp), "\0", 1);
+		// find the next <b>
+		location = strstr(stringp, "<b>");
+	}
+
+	location = strstr(stringp, "<i>");
+	while (location != NULL) { 
+		// to know where to overwrite
+		int position = location - stringp; 
+		strcpy(location, ITALIC);
+		// strcpy modifies where location would be pointing
+		// therefore we need to retrieve the same location from buffer
+		// since stringp is essentially a copy of buffer before this
+		location = strstr(buffer, "<i>");
+		// copying into where the position + bold to prevent overwriting
+		// the copied ITALIC and skipping location by 3 to go over <i>
+		strcpy(stringp+position+strlen(ITALIC), location+3);
+		// reallocating memory to make sure that the fixed string can
+		// be moved back into the buffer
+		buffer = realloc(buffer, sizeof(char *)*(strlen(buffer)+1));
+		memmove(buffer, stringp, strlen(stringp));
+		memmove(buffer+strlen(stringp), "\0", 1);
+		// find the next <b>
+		location = strstr(stringp, "<i>");
+	}
+
+	return buffer;
 }
 
 /*
@@ -263,8 +311,8 @@ CARD_T *parse_card(char *line) {
 				offset += strlen("\"\"");
 			}
 		}
-		char *fixed_text = fix_text(buffer);
-		card->text = strdup(fixed_text);
+		// char *fixed_text = fix_text(buffer);
+		card->text = fix_text(buffer);
 	}
 
 	// parsing attack

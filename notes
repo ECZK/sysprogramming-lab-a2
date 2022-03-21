@@ -10,9 +10,12 @@ rarity
 
 62889,"Silverleaf Poison",2,"Give your weapon\n""After your hero attacks,\ndraw a card.""",,,"SPELL","ROGUE","COMMON"
 
-"Give your weapon\n""After your hero attacks,\ndraw a card.""",
+
 
 56899,"Metamorphosis",5,"Swap your Hero Power to ""Deal 4 damage."" After 2 uses, swap it back.",,,"SPELL","DEMONHUNTER","LEGENDARY"
+
+Swap your Hero Power to ""Deal 4 damage."" After 2 uses, swap it back.
+Swap your Hero Power to "Deal 4 damage
 
 "Swap your Hero Power to ""Deal 4 damage."" After 2 uses, swap it back.",
 
