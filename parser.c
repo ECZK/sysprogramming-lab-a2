@@ -28,6 +28,7 @@
  * as they are specifically unit tested by Mimir
  */
 int dupe_check(unsigned, char*);
+int comparator(const void *a, const void *b);
 char *fix_text(char*);
 void free_card(CARD_T*);
 CARD_T *parse_card(char*);
@@ -74,24 +75,35 @@ int main(int argc, char **argv) {
 		} 
 		// when the dupe is much higher than the current card
 		else if (is_dupe == DUPE) {}
-
 		// index of card that needs to be replaced
 		else {
+			CARD_T *old_card = cards[is_dupe];
+			free_card(old_card);
+			cards[is_dupe] = card;
 			// printf("NEED TO REPLACE AT POSITION %d\n\n", is_dupe);
 		}
 
 	}
+
+	// qsort(cards, total_cards, sizeof(CARD_T), comparator); 
 
 	for (int i=0; i<total_cards; i++) {
 		print_card(cards[i]);
 		free_card(cards[i]);
 	}
 
-
 	if (fd == NULL) return -2;
+	free(cards);
 	free(lineptr);
 	fclose(fd);
 	return 0;
+}
+
+int comparator(const void *a, const void *b) {
+	const CARD_T *a_ptr = a;
+	const CARD_T *b_ptr = b; 
+
+	return strcmp(a_ptr->name, b_ptr->name);
 }
 
 int dupe_check(unsigned id, char *name) {
@@ -234,27 +246,13 @@ char *fix_text(char *text) {
  * and then the card itself
  */
 void free_card(CARD_T *card) {
-
+	// free the fields
+	free(card->name);
+	free(card->text);
+	// free the card
+	free(card);
 }
 
-/*
- * This is the tough one. There will be a lot of
- * logic in this function. Once you have the incoming
- * card's id and name, you should call `dupe_check()`
- * because if the card is a duplicate you have to
- * either abort parsing this one or remove the one
- * from the array so that this one can go at the end.
- *
- * To successfully parse the card text field, you
- * can either go through it (and remember not to stop
- * when you see two double-quotes "") or you can
- * parse backwards from the end of the line to locate
- * the _fifth_ comma.
- *
- * For the fields that are enum values, you have to
- * parse the field and then figure out which one of the
- * values it needs to be. Enums are just numbers!
- */
 CARD_T *parse_card(char *line) {
 	// fields with blanks: cost[2], text[3], attack[4], health[5] 
 
@@ -264,9 +262,6 @@ CARD_T *parse_card(char *line) {
 	// parsing id
 	char *token = strsep(&stringp, ",");
 	card->id = atoi(token);
-
-	// call dupe check as soon as you find a unique key
-	// call fix text for replacing the "ugly" str in the line
 
 	// parsing name
 	stringp++; 
@@ -311,7 +306,6 @@ CARD_T *parse_card(char *line) {
 				offset += strlen("\"\"");
 			}
 		}
-		// char *fixed_text = fix_text(buffer);
 		card->text = fix_text(buffer);
 	}
 
