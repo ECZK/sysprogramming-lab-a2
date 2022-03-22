@@ -60,6 +60,10 @@ int main(int argc, char **argv) {
 
 	cards = realloc(NULL, sizeof(CARD_T)*(total_cards+1));
 	
+	fix_text("<b>Battlecry:</b> \"\"<b>Freeze</bssss>\"\" an enemy.");
+
+	// fix_text("<b>Hello</b>\\n I'm looking for \"\"<i>italicness!</i>\"\"");
+
 	// first read to get rid of the header
 	getline(&lineptr, &n, fd);
 
@@ -71,7 +75,7 @@ int main(int argc, char **argv) {
 			cards[total_cards] = card;
 			cards = realloc(cards, sizeof(CARD_T)*(total_cards+1));
 			total_cards++;
-			// break;
+			break;
 		} 
 		// when the dupe is much higher than the current card
 		else if (is_dupe == DUPE) {}
@@ -97,6 +101,11 @@ int main(int argc, char **argv) {
 	free(lineptr);
 	fclose(fd);
 	return 0;
+
+	// index_t will store the card's name and the offset inside the cards.bin file 
+	// search program will give you a prompt and you'll 
+	// try to do a binary search for the searching 
+
 }
 
 int comparator(const void *a, const void *b) {
@@ -128,7 +137,7 @@ char *fix_text(char *text) {
 	char *token;
 	
 	if ((strstr(stringp, "\"\"")) != NULL) { 
-		token = strsep(&stringp, "\"\"");
+		token = strsep(&stringp, "\"");
 		while (stringp != NULL) {
 			// passing text before " into the buffer
 			memmove(buffer+offset, token, strlen(token)); 
@@ -146,7 +155,7 @@ char *fix_text(char *text) {
 			if ((strstr(stringp, "\"\"")) == NULL) {
 				memmove(buffer+offset, stringp, strlen(stringp)); 
 				offset += strlen(stringp);
-				break;
+				// break;
 			}
 
 			token = strsep(&stringp, "\"\"");

@@ -1,5 +1,5 @@
 id,name,cost,text,attack,health,type,class,rarity
-57174,"Frozen Shadoweaver",3,"<b>Battlecry:</b> <b>Freeze</b> an enemy.",4,3,"MINION","NEUTRAL","COMMON"
+57174,"Frozen Shadoweaver",3,"<b>Battlecry:</b> \"\"<b>Freeze</b> an enemy.\"\"",4,3,"MINION","NEUTRAL","COMMON"
 57950,"Deep Freeze",8,"<b>Freeze</b> an enemy. Summon two 3/6 Water Elementals.",,,"SPELL","MAGE","RARE"
 41111,"Glacial Shard",1,"<b>Battlecry:</b> <b>Freeze</b> an enemy.",2,1,"MINION","NEUTRAL","COMMON"
 42678,"Brrrloc",2,"<b>Battlecry:</b> <b>Freeze</b> an enemy.",2,2,"MINION","SHAMAN","COMMON"

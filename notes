@@ -44,3 +44,8 @@ nested b
 b >> i 
 
 68377,"Arcanite Reaper",5,text,attack 5,health ,"WEAPON","WARRIOR","FREE"
+
+"<b>Hello</b>\\n I'm looking for \"\"<i>italicness!</i>\"\""
+
+Hello
+I'm looking for \"\"<i>italicness!</i>\"\""
