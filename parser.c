@@ -55,14 +55,14 @@ int main(int argc, char **argv) {
 	char *infile = argv[1];
 	FILE * fd = fopen(infile, "r");
 
+	if (fd == NULL) return -1;
+
 	char *lineptr = NULL;	// retrieved line
 	size_t n = 0;			// 
 
+	// char *text = strdup("<b>Hello</b>\\n I'm looking for \"\"<i>italicness!</i>\"\"");
+	// fix_text(text);
 	cards = realloc(NULL, sizeof(CARD_T)*(total_cards+1));
-	
-	fix_text("<b>Battlecry:</b> \"\"<b>Freeze</bssss>\"\" an enemy.");
-
-	// fix_text("<b>Hello</b>\\n I'm looking for \"\"<i>italicness!</i>\"\"");
 
 	// first read to get rid of the header
 	getline(&lineptr, &n, fd);
@@ -75,10 +75,12 @@ int main(int argc, char **argv) {
 			cards[total_cards] = card;
 			cards = realloc(cards, sizeof(CARD_T)*(total_cards+1));
 			total_cards++;
-			break;
+			// break;
 		} 
 		// when the dupe is much higher than the current card
-		else if (is_dupe == DUPE) {}
+		else if (is_dupe == DUPE) {
+			free_card(card);
+		}
 		// index of card that needs to be replaced
 		else {
 			CARD_T *old_card = cards[is_dupe];
@@ -131,59 +133,53 @@ int dupe_check(unsigned id, char *name) {
 char *fix_text(char *text) {
 	char *buffer = strdup(text);
 	char *stringp = text;
-	int offset = 0;
+	char *location;
+	// int offset = 0;
 
-	// replacing "" to "
-	char *token;
-	
-	if ((strstr(stringp, "\"\"")) != NULL) { 
-		token = strsep(&stringp, "\"");
-		while (stringp != NULL) {
-			// passing text before " into the buffer
-			memmove(buffer+offset, token, strlen(token)); 
-			offset += strlen(token);
+	// printf("buffer:		%s\n", buffer);
 
-			// passing " into the buffer
-			memmove(buffer+offset, "\"", strlen("\"")); 
-			offset += strlen("\"");
-
-			// skip over the remaining "
-			stringp++;
-
-			// check if there are any remaining "" in stringp,
-			// if not, then transfer the rest of stringp into the buffer 
-			if ((strstr(stringp, "\"\"")) == NULL) {
-				memmove(buffer+offset, stringp, strlen(stringp)); 
-				offset += strlen(stringp);
-				// break;
-			}
-
-			token = strsep(&stringp, "\"\"");
-		}
-	}
-
-	// to make sure you end the string	
-	if (offset > 0) memmove(buffer+offset, "\0", 1); 
-
-	// copy updated contents from buffer into stringp again
-	// set offset back to prevent overflow
-	strcpy(stringp, buffer); 
-	offset = 0;
-
-	char *location = strstr(stringp, "</b>");
+	location = strstr(stringp, "\"\"");
 	while (location != NULL) { 
-		memmove(location, END, strlen(END));
-		location = strstr(stringp, "</b>");
+		// to know where to overwrite
+		int position = location - stringp; 
+		// printf("text: %s\n", text);
+		// printf("location: %s\n", location);
+
+		// printf("stringp:	%s\n", stringp);
+		// printf("location:	%s\n\n", location);
+
+		strcpy(location, "\"");
+
+		// printf("stringp:	%s\n", stringp);
+		// printf("location+2:	%s\n\n", location+2);
+		// printf("text: %s\n", text);
+		// printf("location: %s\n", location);
+
+		// strcpy modifies where location would be pointing
+		// therefore we need to retrieve the same location from buffer
+		// since stringp is essentially a copy of buffer before this
+
+		location = strstr(buffer, "\"\"");
+
+		// printf("startingp:	%s\n", stringp);
+		// printf("start+pos:	%s\n", stringp+position);
+		// printf("location+2:	%s\n", location+2);
+		// printf("buffer:		%s\n", buffer);
+
+		// copying into where the position + bold to prevent overwriting
+		// the copied BOLD and skipping location by 3 to go over <b>
+		strcpy(stringp+position+1, location+2);
+		memmove(buffer, stringp, strlen(stringp));
+		memmove(buffer+strlen(stringp), "\0", 1);
+		// find the next <b>
+
+		// printf("stringp:	%s\n\n", stringp);
+
+		
+		location = strstr(stringp, "\"\"");
 	}
 
-	location = strstr(stringp, "</i>");
-	while (location != NULL) { 
-		memmove(location, END, strlen(END));
-		location = strstr(stringp, "</i>");
-	}
-
-	memmove(buffer, stringp, strlen(stringp));
-	// printf("%s\n", buffer);
+	// printf("buffer:		%s\n\n\n", buffer);
 
 
 	location = strstr(stringp, "\\n");
@@ -204,6 +200,59 @@ char *fix_text(char *text) {
 		// find the next <b>
 		location = strstr(stringp, "\\n");
 	}
+
+
+	// replacing "" to "
+	// char *token;
+	
+	// if ((strstr(stringp, "\"\"")) != NULL) { 
+	// 	token = strsep(&stringp, "\"");
+	// 	while (stringp != NULL) {
+	// 		// passing text before " into the buffer
+	// 		memmove(buffer+offset, token, strlen(token)); 
+	// 		offset += strlen(token);
+
+	// 		// passing " into the buffer
+	// 		memmove(buffer+offset, "\"", strlen("\"")); 
+	// 		offset += strlen("\"");
+
+	// 		// skip over the remaining "
+	// 		stringp++;
+
+	// 		// check if there are any remaining "" in stringp,
+	// 		// if not, then transfer the rest of stringp into the buffer 
+	// 		if ((strstr(stringp, "\"\"")) == NULL) {
+	// 			memmove(buffer+offset, stringp, strlen(stringp)); 
+	// 			offset += strlen(stringp);
+	// 			// break;
+	// 		}
+
+	// 		token = strsep(&stringp, "\"\"");
+	// 	}
+	// }
+
+	// // to make sure you end the string	
+	// if (offset > 0) memmove(buffer+offset, "\0", 1); 
+
+	// copy updated contents from buffer into stringp again
+	// set offset back to prevent overflow
+	strcpy(stringp, buffer); 
+	// offset = 0;
+
+	location = strstr(stringp, "</b>");
+	while (location != NULL) { 
+		memmove(location, END, strlen(END));
+		location = strstr(stringp, "</b>");
+	}
+
+	location = strstr(stringp, "</i>");
+	while (location != NULL) { 
+		memmove(location, END, strlen(END));
+		location = strstr(stringp, "</i>");
+	}
+
+	memmove(buffer, stringp, strlen(stringp));
+	// printf("%s\n", buffer);
 
 	location = strstr(stringp, "<b>");
 	while (location != NULL) { 
@@ -246,6 +295,8 @@ char *fix_text(char *text) {
 		// find the next <b>
 		location = strstr(stringp, "<i>");
 	}
+
+	// printf("buffer:		%s\n", buffer);
 
 	return buffer;
 }

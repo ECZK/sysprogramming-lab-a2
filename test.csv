@@ -1,0 +1,7 @@
+id,name,cost,text,attack,health,type,class,rarity
+57950,"Deep Freeze",8,"<b>Battlecry:</b> ""<b>Freeze</b>"" an enemy.",,,"SPELL","MAGE","RARE"
+60000,"Soul of the Forest",4,"Give your minions ""<b>Deathrattle:</b> Summon a 2/2 Treant.""",,,"SPELL","DRUID","COMMON"
+69867,"Soul of the Forest",4,"Give your minions ""<b>Deathrattle:</b> Summon a 2/2 Treant.""",,,"SPELL","DRUID","COMMON"
+41111,"Glacial Shard",1,"<b>Battlecry:</b> <b>Freeze</b> an enemy.",2,1,"MINION","NEUTRAL","COMMON"
+42678,"Brrrloc",2,"<b>Battlecry:</b> <b>Freeze</b> an enemy.",2,2,"MINION","SHAMAN","COMMON"
+57197,"Maiev Shadowsong",4,"<b>Battlecry:</b> Choose a minion.\nIt goes <b>Dormant</b> for 2 turns.",4,3,"MINION","NEUTRAL","LEGENDARY"
