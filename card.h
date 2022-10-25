@@ -68,3 +68,9 @@ typedef struct {
 	unsigned health;
 } CARD_T;
 
+typedef struct {
+	unsigned length;
+	char *name;
+	off_t offset;
+} INDEX_T;
+

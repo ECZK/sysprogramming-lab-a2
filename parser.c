@@ -42,14 +42,6 @@ CARD_T **cards = NULL;
 size_t total_cards = 0;
 
 int main(int argc, char **argv) {
-	// TODO: V  Open the file
-	//       2. Read lines from the file...
-	//          a. for each line, `parse_card()`
-    //          b. add the card to the array
-	//       3. Sort the array
-	//       4. Print and free the cards
-	//       5. Clean up!
-
 	if (argc != 2) return -1;
 
 	char *infile = argv[1];
@@ -60,9 +52,6 @@ int main(int argc, char **argv) {
 	char *lineptr = NULL;	// retrieved line
 	size_t n = 0;			// 
 
-	// char *text = strdup("<b>Battlecry:</b> <b>Discover</b>\\nand cast 2 Improved\\n<b>Secrets</b>.");
-	// fix_text(text);
-	// free(text);
 	cards = realloc(NULL, sizeof(CARD_T)*(total_cards+1));
 
 	// first read to get rid of the header
@@ -92,19 +81,58 @@ int main(int argc, char **argv) {
 
 	}
 
-	qsort(cards, total_cards, sizeof(CARD_T *), comparator); 
-
+	// opening the .bin files
 	FILE *outfile_cards = fopen("cards.bin", "wb");
 	FILE *outfile_index = fopen("index.bin", "wb");
 
-	fwrite(&cards[0]->name, sizeof(char *), 1, outfile_cards); 
+	// opening the .bin files
+	INDEX_T **indexes;
+	size_t total_indexes = 0;
 
+	indexes = realloc(NULL, sizeof(INDEX_T)*(total_indexes+1));
 
 	for (int i=0; i<total_cards; i++) {
-		print_card(cards[i]);
-		fwrite(cards[i]->name, sizeof(CARD_T), 1, outfile_cards); 
+		// creating an index struct
+		INDEX_T *index = realloc(NULL, sizeof(INDEX_T));
+		int length = strlen(cards[i]->text);
+		off_t offset = ftello(outfile_cards);
+
+		// setting values for index struct 
+		index->name = strdup(cards[i]->name);
+		index->length = strlen(cards[i]->name);
+		index->offset = offset;
+
+		// allocating more space for the indexes
+		indexes[total_indexes] = index;
+		indexes = realloc(indexes, sizeof(INDEX_T)*(total_indexes+1));
+		total_indexes++;
+
+		// writing down cards into the cards.bin
+		fwrite(&cards[i]->id, sizeof(unsigned), 1, outfile_cards);
+		fwrite(&cards[i]->cost, sizeof(unsigned), 1, outfile_cards);
+		fwrite(&cards[i]->type, sizeof(Type), 1, outfile_cards);
+		fwrite(&cards[i]->class, sizeof(Class), 1, outfile_cards);
+		fwrite(&cards[i]->rarity, sizeof(Rarity), 1, outfile_cards);
+		fwrite(&length, sizeof(int), 1, outfile_cards);
+		fwrite(cards[i]->text, sizeof(char), length, outfile_cards);
+		fwrite(&cards[i]->attack, sizeof(unsigned), 1, outfile_cards);
+		fwrite(&cards[i]->health, sizeof(unsigned), 1, outfile_cards);		
 
 		free_card(cards[i]);
+	}
+
+	// sort the indexes
+	qsort(indexes, total_cards, sizeof(INDEX_T *), comparator); 
+
+	// writing the the total cards at the start of index.bin
+	fwrite(&total_cards, sizeof(size_t), 1, outfile_index); 
+	printf("%ld", total_cards);
+	
+	for (int i=0; i<total_cards; i++) {
+		unsigned length = strlen(indexes[i]->name);
+		fwrite(&length, sizeof(unsigned), 1, outfile_index); 
+		fwrite(indexes[i]->name, sizeof(char), length, outfile_index); 
+		fwrite(&indexes[i]->offset, sizeof(off_t), 1, outfile_index); 
 	}
 
 	if (fd == NULL) return -2;
@@ -115,16 +143,11 @@ int main(int argc, char **argv) {
 	fclose(outfile_cards);
 	fclose(outfile_index);
 	return 0;
-
-	// index_t will store the card's name and the offset inside the cards.bin file 
-	// search program will give you a prompt and you'll 
-	// try to do a binary search for the searching 
-
 }
 
 int comparator(const void *a, const void *b) {
-	const CARD_T *a_ptr = *(CARD_T **)a;
-	const CARD_T *b_ptr = *(CARD_T **)b; 
+	const INDEX_T *a_ptr = *(INDEX_T **)a;
+	const INDEX_T *b_ptr = *(INDEX_T **)b; 
 
 	return strcmp(a_ptr->name, b_ptr->name);
 }
@@ -146,9 +169,6 @@ char *fix_text(char *text) {
 	char *buffer = strdup(text);
 	char *stringp = text;
 	char *location;
-	// int offset = 0;
-
-	// printf("buffer:%s\n", buffer);
 
 	location = strstr(stringp, "\"\"");
 	while (location != NULL) { 
@@ -162,19 +182,14 @@ char *fix_text(char *text) {
 
 		location = strstr(buffer, "\"\"");
 		// copying into where the position + bold to prevent overwriting
-		// the copied BOLD and skipping location by 3 to go over <b>
+		// the copied BOLD and skipping location by 2 to go over ""
 		strcpy(stringp+position+1, location+2);
 		memmove(buffer, stringp, strlen(stringp));
 		memmove(buffer+strlen(stringp), "\0", 1);
 		// find the next <b>
 
-		// printf("stringp:	%s\n\n", stringp);
-
-		
 		location = strstr(stringp, "\"\"");
 	}
-
-	// printf("buffer:		%s\n\n\n", buffer);
 
 	location = strstr(stringp, "\\n");
 	while (location != NULL) { 
@@ -187,7 +202,7 @@ char *fix_text(char *text) {
 		// since stringp is essentially a copy of buffer before this
 		location = strstr(buffer, "\\n");
 		// copying into where the position + bold to prevent overwriting
-		// the copied BOLD and skipping location by 3 to go over <b>
+		// the copied BOLD and skipping location by 2 to go over \n
 		strcpy(stringp+position+strlen("\n"), location+2);
 		memmove(buffer, stringp, strlen(stringp));
 		memmove(buffer+strlen(stringp), "\0", 1);
@@ -277,6 +292,7 @@ CARD_T *parse_card(char *line) {
 	CARD_T *card = malloc(sizeof(CARD_T));
 	char *stringp = line;
 
+
 	// parsing id
 	char *token = strsep(&stringp, ",");
 	card->id = atoi(token);
@@ -306,7 +322,10 @@ CARD_T *parse_card(char *line) {
 	else { // text is not null
 		stringp++;
 		// while loop through the text and find the next "
+		printf("stringp: %s\n", stringp); 
 		char *dbquote = strstr(stringp, "\"");
+		printf("dbquote: %s\n\n", dbquote); 
+
 		while((dbquote = strstr(stringp, "\""))) {
 			// check if it's a terminating quote
 			if (strncmp(dbquote+1, ",", strlen(",")) == 0) {

@@ -49,3 +49,21 @@ b >> i
 
 Hello
 I'm looking for \"\"<i>italicness!</i>\"\""
+
+
+do not sort the cards and write the cards as they are
+as you write down the cards in cards.bin,
+oftello will tell you the position in the file of which card is being written  
+you are also creating the index structs and putting them in the indexes array 
+then sort the indexes array and then write them inside the index.bin
+
+length - so you can reallocate memory when you need before writing them down into cards.bin 
+
+index struct
+    name - name of the card
+    offset 
+
+searcher will only read the index.bin and keep an array of the indexes again 
+user will input the cardname and it will look through the indexes with binary sort to make 
+things faster 
+you will then take the offset and then read the cards file with that
